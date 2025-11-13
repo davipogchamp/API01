@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Security.Cryptography;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Modelo.Domain;
+using Modelo.Application.Interfaces;
+using Modelo.Infra;
 
 namespace API01.Controllers
 {
@@ -8,8 +11,14 @@ namespace API01.Controllers
     [ApiController]
     public class AlunoController : ControllerBase
     {
-        public AlunoController() 
+
+        private readonly IAlunoApplication _alunoApplication;
+        private readonly ICepService _cepService;
+
+        public AlunoController(IAlunoApplication alunoApplication, ICepService cepService) 
         {
+            _alunoApplication = alunoApplication;
+            _cepService = cepService;
 
         }
         [HttpGet("BuscarDadosAlunos/{id}")]
@@ -33,6 +42,20 @@ namespace API01.Controllers
             {
                 return BadRequest(e.Message);
             } 
+
+        }
+        [HttpGet("BuscarCep/{cep}")]
+        public async Task<IActionResult> BuscarCep(string cep)
+        {
+            try
+            {
+                var endereco = await _cepService.BuscarEnderecoPorCep(cep);
+                return Ok("CEP buscado com sucesso!");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
     }
 }
